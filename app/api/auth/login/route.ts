@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcyrpt from "bcrypt";
-import { signToken } from "@/app/lib/jwt";
+import { signRefreshToken, signToken } from "@/app/lib/jwt";
 
 const prisma = new PrismaClient();
 
@@ -42,13 +42,15 @@ export async function POST(request: Request) {
       role: user.role
     });
 
+    const refreshToken = await signRefreshToken({
+      id: user.id,
+      email: user.email,
+      role: user.role
+    });
+
     return NextResponse.json({
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role
-      }
+      refreshToken
     });
 
   } catch (error) {

@@ -10,7 +10,18 @@ export async function signToken(payload: any) {
 
   return await new jose.SignJWT(payload)
   .setProtectedHeader({ alg: 'HS256'})
-  .setExpirationTime('1d')
+  .setExpirationTime('10s')
+  .sign(JWT_SECRET);
+}
+
+export async function signRefreshToken(payload: any) {
+  if(!process.env.JWT_SECRET) {
+    throw new Error('JWT Assinatura não configurada!')
+  }
+
+  return await new jose.SignJWT(payload)
+  .setProtectedHeader({ alg: 'HS256'})
+  .setExpirationTime('2min')
   .sign(JWT_SECRET);
 }
 
