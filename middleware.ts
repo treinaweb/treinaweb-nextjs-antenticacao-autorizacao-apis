@@ -39,7 +39,16 @@ export async function middleware(request: NextRequest) {
     }
 
     return NextResponse.next();
-  } catch (error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    
+    if(error.name === 'JWTExpired') {
+        return NextResponse.json(
+            { message: 'Token Expirado' },
+            { status: 401 }
+          );
+    }
+    
     return NextResponse.json(
       { message: 'Token Inválido', error: error },
       { status: 403 }

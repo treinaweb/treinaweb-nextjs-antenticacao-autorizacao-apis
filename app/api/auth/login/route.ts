@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcyrpt from "bcrypt";
@@ -6,16 +7,16 @@ import { signRefreshToken, signToken } from "@/app/lib/jwt";
 const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
-  const { email, password } = await request.json();
-
-  if(!email || !password) {
-    return NextResponse.json(
-      { message: 'Credenciais inválidas' },
-      { status: 401} 
-    )
-  }
-
   try {
+    const { email, password } = await request.json();
+
+    if(!email || !password) {
+     return NextResponse.json(
+        { message: 'Credenciais inválidas' },
+        { status: 401 }
+      );
+    }
+
     const user = await prisma.user.findUnique({
       where: { email }
     });
@@ -23,8 +24,8 @@ export async function POST(request: Request) {
     if(!user || !user.active) {
       return NextResponse.json(
         { message: 'Credenciais inválidas' },
-        { status: 401} 
-      )
+        { status: 401 }
+      );
     }
 
     const passwordMatch = await bcyrpt.compare(password, user.password);
@@ -32,8 +33,8 @@ export async function POST(request: Request) {
     if(!passwordMatch) {
       return NextResponse.json(
         { message: 'Credenciais inválidas' },
-        { status: 401 } 
-      )
+        { status: 401 }
+      );
     }
 
     const token = await signToken({
@@ -46,18 +47,18 @@ export async function POST(request: Request) {
       id: user.id,
       email: user.email,
       role: user.role
-    });
-
+    })
+  
     return NextResponse.json({
       token,
       refreshToken
     });
 
-  } catch (error) {
+  } catch (error: any) {   
     return NextResponse.json(
       { message: error },
-      { status: 500} 
-    )
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }

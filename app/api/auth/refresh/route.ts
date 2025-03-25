@@ -11,11 +11,11 @@ export async function POST(request: Request) {
 
     if(!refresh) {
       return NextResponse.json(
-        { message: 'Credenciais inválidas' },
-        { status: 401} 
-      )
+        { message: 'Token inválido' },
+        { status: 401 }
+      );
     }
-  
+
     const { email } = await verifyToken(refresh);
 
     const user = await prisma.user.findUnique({
@@ -23,10 +23,10 @@ export async function POST(request: Request) {
     });
 
     if(!user || !user.active) {
-      return NextResponse.json(
+    return NextResponse.json(
         { message: 'Credenciais inválidas' },
-        { status: 401} 
-      )
+        { status: 401 }
+      );
     }
 
     const newToken = await signToken({
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       id: user.id,
       email: user.email,
       role: user.role
-    });
+    })
 
     return NextResponse.json({
       token: newToken,
@@ -47,16 +47,16 @@ export async function POST(request: Request) {
     });
 
   } catch (error: any) {
-    if(error.name === "JWTExpired") {
+    if(error.name === 'JWTExpired') {
       return NextResponse.json(
-        { message: "Token Expirado" },
-        { status: 401 })
-    }
-
-    return NextResponse.json(
-      { message: error },
-      { status: 500} 
-    )
+          { message: 'Token Expirado' },
+          { status: 401 }
+        );
+  } 
+   return NextResponse.json(
+      { message: 'BAD_REQUEST', error },
+      { status: 400 }
+    );
   } finally {
     await prisma.$disconnect();
   }
